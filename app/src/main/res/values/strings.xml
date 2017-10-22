@@ -3,4 +3,6 @@
 
     <string name="discover_nearby_devices">Discover nearby devices</string>
     <string name="share_device_information">Share device information</string>
+    <string name="whats_your_username">Write your username</string>
+    <string name="where_you_from">Where you from?</string>
 </resources>

@@ -2,12 +2,14 @@ package br.com.mirabilis.nearbyapipubsubkotlin
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.util.Log
 import android.widget.ArrayAdapter
+import br.com.mirabilis.nearbyapipubsubkotlin.databinding.ActivityMainBinding
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.nearby.Nearby
@@ -18,6 +20,8 @@ import java.util.*
 class MainActivity : AppCompatActivity(),
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
+
+    private val recovery: String = "USER"
 
     /**
      * Tag for logs
@@ -40,11 +44,6 @@ class MainActivity : AppCompatActivity(),
      */
     private val pubSubStrategy = Strategy.Builder().setTtlSeconds(ttlInSeconds).build()
 
-    /**
-     * Creates a UUID and saves it to [SharedPreferences]. The UUID is added to the published
-     * message to avoid it being undelivered due to de-duplication. See [DeviceMessage] for
-     * details.
-     */
     private fun getUUID(sharedPreferences: SharedPreferences): String {
         var uuid = sharedPreferences.getString(keyUUID, "")
         if (TextUtils.isEmpty(uuid)) {
@@ -74,16 +73,27 @@ class MainActivity : AppCompatActivity(),
      */
     private var nearbyDevicesArrayAdapter: ArrayAdapter<String>? = null
 
+    /**
+     * User
+     */
+    private lateinit var user: User
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putSerializable(recovery, user)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-        /**
-         * Build the message that is going to be published.
-         * This contains the device name and a UUID.
-         */
-        pubMessage = DeviceMessage.newNearbyMessage(getUUID(getSharedPreferences(
-                applicationContext.packageName, Context.MODE_PRIVATE)))
+        user = savedInstanceState?.getSerializable(recovery) as User? ?:
+                User.build(getUUID(getSharedPreferences(applicationContext.packageName,
+                        Context.MODE_PRIVATE)),
+                        "rodrigosimoesrosa",
+                        "Brazil")
+
+        val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
+        binding.user = user
 
         messageListener = object : MessageListener() {
             override fun onFound(message: Message) {
@@ -91,7 +101,7 @@ class MainActivity : AppCompatActivity(),
                  * Called when a new message is found.
                  */
                 nearbyDevicesArrayAdapter!!.add(
-                        DeviceMessage.fromNearbyMessage(message).messageBody)
+                        User.toUser(message).toString())
             }
 
             override fun onLost(message: Message) {
@@ -99,11 +109,14 @@ class MainActivity : AppCompatActivity(),
                  * Called when a message is no longer detectable nearby.
                  */
                 nearbyDevicesArrayAdapter!!.remove(
-                        DeviceMessage.fromNearbyMessage(message).messageBody)
+                        User.toUser(message).toString())
             }
         }
 
         subscribeSwitch.setOnCheckedChangeListener( { _, isChecked ->
+
+            updateInfo()
+
             /**
              * If GoogleApiClient is connected, perform sub actions in response to user action.
              * If it isn't connected, do nothing, and perform sub actions when it connects
@@ -119,6 +132,9 @@ class MainActivity : AppCompatActivity(),
         })
 
         publishSwitch.setOnCheckedChangeListener( { _, isChecked ->
+
+            updateInfo()
+
             /**
              * If GoogleApiClient is connected, perform pub actions in response to user action.
              * If it isn't connected, do nothing, and perform pub actions when it connects
@@ -141,6 +157,10 @@ class MainActivity : AppCompatActivity(),
         nearbyDevicesListView.adapter = nearbyDevicesArrayAdapter
 
         buildGoogleApiClient()
+    }
+
+    private fun updateInfo() {
+        pubMessage = user.toMessage()
     }
 
     /**

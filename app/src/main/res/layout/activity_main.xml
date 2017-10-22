@@ -32,7 +32,6 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:hint="@string/where_you_from"
-            android:inputType="number"
             android:text="@={user.nationality}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

@@ -59,11 +59,6 @@ class MainActivity : AppCompatActivity(),
     private var googleApiClient: GoogleApiClient? = null
 
     /**
-     * The [Message] object used to broadcast information about the device to nearby devices.
-     */
-    private var pubMessage: Message? = null
-
-    /**
      * A [MessageListener] for processing messages from nearby devices.
      */
     private var messageListener: MessageListener? = null
@@ -115,8 +110,6 @@ class MainActivity : AppCompatActivity(),
 
         subscribeSwitch.setOnCheckedChangeListener( { _, isChecked ->
 
-            updateInfo()
-
             /**
              * If GoogleApiClient is connected, perform sub actions in response to user action.
              * If it isn't connected, do nothing, and perform sub actions when it connects
@@ -132,8 +125,6 @@ class MainActivity : AppCompatActivity(),
         })
 
         publishSwitch.setOnCheckedChangeListener( { _, isChecked ->
-
-            updateInfo()
 
             /**
              * If GoogleApiClient is connected, perform pub actions in response to user action.
@@ -157,10 +148,6 @@ class MainActivity : AppCompatActivity(),
         nearbyDevicesListView.adapter = nearbyDevicesArrayAdapter
 
         buildGoogleApiClient()
-    }
-
-    private fun updateInfo() {
-        pubMessage = user.toMessage()
     }
 
     /**
@@ -252,7 +239,7 @@ class MainActivity : AppCompatActivity(),
                     }
                 }).build()
 
-        Nearby.Messages.publish(googleApiClient, pubMessage, options)
+        Nearby.Messages.publish(googleApiClient, user.toMessage(), options)
                 .setResultCallback { status ->
                     if (status.isSuccess) {
                         Log.i(tag, "Published successfully.")
@@ -276,7 +263,7 @@ class MainActivity : AppCompatActivity(),
      */
     private fun unpublish() {
         Log.i(tag, "Unpublishing.")
-        Nearby.Messages.unpublish(googleApiClient, pubMessage)
+        Nearby.Messages.unpublish(googleApiClient, user.toMessage())
     }
 
     /**

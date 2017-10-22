@@ -2,8 +2,8 @@
 
 This sample used as a base https://github.com/googlesamples/android-nearby/tree/master/messages/NearbyDevices
 
-Getting Started
----------------
+Generating Nearby API Key
+-------------------------
 
 This sample uses the Gradle build system. To build this project, use the
 "gradlew build" command. Or, use "Import Project" in Android Studio.
@@ -22,4 +22,4 @@ fingerprint and package name for your app. Use
 `com.google.android.gms.nearby.messages.samples.nearbydevices`
 for the package name.
 
-4. Copy the API key generated, and paste it in `AndroidManifest.xml`.
+4. Copy the API key generated, and replace/paste it in `AndroidManifest.xml`.

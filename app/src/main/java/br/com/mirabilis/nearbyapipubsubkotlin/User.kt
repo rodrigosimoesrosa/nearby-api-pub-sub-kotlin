@@ -40,7 +40,6 @@ class User(private val model: String = Build.MODEL) : BaseObservable(), Serializ
             field = value
             notifyPropertyChanged(BR.username)
         }
-        get() = field
 
     @Bindable
     var nationality: String = String()
@@ -48,8 +47,6 @@ class User(private val model: String = Build.MODEL) : BaseObservable(), Serializ
             field = value
             notifyPropertyChanged(BR.nationality)
         }
-        get() = field
-
 
     fun toMessage() : Message = Message(Gson()
             .toJson(this)
